@@ -6,6 +6,7 @@
 /obj/item/circuit_component/module
 	display_name = "Module"
 	desc = "A component that has other components within it, acting like a function. Use it in your hand to control the amount of input and output ports it has, as well as being able to access the integrated circuit contained inside."
+	category = "Abstract"
 
 	var/obj/item/integrated_circuit/module/internal_circuit
 
@@ -17,13 +18,17 @@
 
 	var/port_limit = 10
 
+	ui_buttons = list(
+		"edit" = "action"
+	)
+
 /obj/item/integrated_circuit/module
 	var/obj/item/circuit_component/module/attached_module
 
 /obj/item/integrated_circuit/module/ui_host(mob/user)
-	. = ..()
-	if(. == src)
-		return attached_module
+	if(attached_module)
+		return attached_module.ui_host()
+	return ..()
 
 /obj/item/integrated_circuit/module/set_display_name(new_name)
 	. = ..()
@@ -40,6 +45,19 @@
 	if(ispath(type, /obj/item/circuit_component/module_output))
 		return attached_module.output_component
 
+	return ..()
+
+/obj/item/integrated_circuit/module/add_component(obj/item/circuit_component/to_add, mob/living/user)
+	if(to_add.circuit_flags & CIRCUIT_FLAG_REFUSE_MODULE)
+		balloon_alert(user, "doesn't fit into module!")
+		return
+	. = ..()
+	if(attached_module)
+		attached_module.circuit_size += to_add.circuit_size
+
+/obj/item/integrated_circuit/module/remove_component(obj/item/circuit_component/to_remove)
+	if(attached_module)
+		attached_module.circuit_size -= to_remove.circuit_size
 	return ..()
 
 /obj/item/integrated_circuit/module/Destroy()
@@ -68,8 +86,7 @@
 	/// The currently attached module
 	var/obj/item/circuit_component/module/attached_module
 
-/obj/item/circuit_component/module_output/input_received(datum/port/input/port)
-	. = ..()
+/obj/item/circuit_component/module_output/pre_input_received(datum/port/input/port)
 	if(!port)
 		return
 	// We don't check the parent here because frankly, we don't care. We only sync our input with the module's output
@@ -77,23 +94,22 @@
 	if(!port_to_update)
 		CRASH("[port.type] doesn't have a linked port in [type]!")
 
-	port_to_update.set_output(port.input_value)
+	port_to_update.set_output(port.value)
 
-/obj/item/circuit_component/module/input_received(datum/port/input/port)
-	. = ..()
+/obj/item/circuit_component/module/pre_input_received(datum/port/input/port)
 	if(!port)
 		return
 	var/datum/port/output/port_to_update = linked_ports[port]
 	if(!port_to_update)
 		CRASH("[port.type] doesn't have a linked port in [type]!")
 
-	port_to_update.set_output(port.input_value)
+	port_to_update.set_output(port.value)
 
 /obj/item/circuit_component/module_output/Destroy()
 	attached_module = null
 	return ..()
 
-/obj/item/circuit_component/module/Initialize()
+/obj/item/circuit_component/module/Initialize(mapload)
 	. = ..()
 	internal_circuit = new(src)
 	internal_circuit.attached_module = src
@@ -155,9 +171,9 @@
 
 /obj/item/circuit_component/module/add_to(obj/item/integrated_circuit/added_to)
 	. = ..()
-	RegisterSignal(added_to, COMSIG_CIRCUIT_SET_CELL, .proc/handle_set_cell)
-	RegisterSignal(added_to, COMSIG_CIRCUIT_SET_ON, .proc/handle_set_on)
-	RegisterSignal(added_to, COMSIG_CIRCUIT_SET_SHELL, .proc/handle_set_shell)
+	RegisterSignal(added_to, COMSIG_CIRCUIT_SET_CELL, PROC_REF(handle_set_cell))
+	RegisterSignal(added_to, COMSIG_CIRCUIT_SET_ON, PROC_REF(handle_set_on))
+	RegisterSignal(added_to, COMSIG_CIRCUIT_SET_SHELL, PROC_REF(handle_set_shell))
 	internal_circuit.set_cell(added_to.cell)
 	internal_circuit.set_shell(added_to.shell)
 	internal_circuit.set_on(added_to.on)
@@ -174,7 +190,7 @@
 	))
 	return ..()
 
-/obj/item/circuit_component/module/proc/handle_set_cell(datum/source, obj/item/stock_parts/cell/cell)
+/obj/item/circuit_component/module/proc/handle_set_cell(datum/source, obj/item/stock_parts/power_store/cell/cell)
 	SIGNAL_HANDLER
 	internal_circuit.set_cell(cell)
 
@@ -211,17 +227,17 @@
 
 /obj/item/circuit_component/module/ui_static_data(mob/user)
 	. = list()
-	.["global_port_types"] = GLOB.wiremod_types
+	.["global_port_types"] = GLOB.wiremod_basic_types
 
-/obj/item/circuit_component/module/attackby(obj/item/I, mob/living/user, params)
+/obj/item/circuit_component/module/attackby(obj/item/I, mob/living/user, list/modifiers, list/attack_modifiers)
 	if(istype(I, /obj/item/circuit_component))
-		internal_circuit.attackby(I, user, params)
+		internal_circuit.attackby(I, user, modifiers)
 		return
 	return ..()
 
 #define WITHIN_RANGE(id, table) (id >= 1 && id <= length(table))
 
-/obj/item/circuit_component/module/ui_act(action, list/params)
+/obj/item/circuit_component/module/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
 	if(.)
 		return
@@ -280,7 +296,7 @@
 
 			if(action == "set_port_type")
 				var/type = params["port_type"]
-				if(!(type in GLOB.wiremod_types))
+				if(!(type in GLOB.wiremod_basic_types))
 					return
 				component_port.set_datatype(type)
 				internal_component_port.set_datatype(type)
@@ -297,6 +313,9 @@
 		SStgui.update_uis(internal_circuit)
 
 #undef WITHIN_RANGE
+
+/obj/item/circuit_component/module/ui_perform_action(mob/user, action)
+	interact(user)
 
 /obj/item/circuit_component/module/ui_interact(mob/user, datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)

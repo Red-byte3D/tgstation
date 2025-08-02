@@ -3,6 +3,7 @@
 	singular_name = "bill"
 	icon = 'icons/obj/economy.dmi'
 	icon_state = null
+	worn_icon_state = "nothing"
 	amount = 1
 	max_amount = INFINITY
 	throwforce = 0
@@ -16,6 +17,7 @@
 
 /obj/item/stack/spacecash/Initialize(mapload, new_amount, merge = TRUE, list/mat_override=null, mat_amt=1)
 	. = ..()
+	add_traits(list(TRAIT_FISHING_BAIT, TRAIT_BAIT_ALLOW_FISHING_DUD), INNATE_TRAIT)
 	update_desc()
 
 /obj/item/stack/spacecash/update_desc()
@@ -26,11 +28,11 @@
 /obj/item/stack/spacecash/get_item_credit_value()
 	return (amount*value)
 
-/obj/item/stack/spacecash/merge(obj/item/stack/S)
+/obj/item/stack/spacecash/merge(obj/item/stack/target_stack, limit)
 	. = ..()
 	update_desc()
 
-/obj/item/stack/spacecash/use(used, transfer = FALSE)
+/obj/item/stack/spacecash/use(used, transfer = FALSE, check = TRUE)
 	. = ..()
 	update_desc()
 

@@ -2,10 +2,10 @@
 /obj/structure/tank_holder
 	name = "tank holder"
 	desc = "A metallic frame that can hold tanks and extinguishers."
-	icon = 'icons/obj/tank.dmi'
+	icon = 'icons/obj/canisters.dmi'
 	icon_state = "holder"
 
-	custom_materials = list(/datum/material/iron = 2000)
+	custom_materials = list(/datum/material/iron =SHEET_MATERIAL_AMOUNT)
 
 	density = FALSE
 	anchored = FALSE
@@ -17,7 +17,7 @@
 	/// The stored tank. If this is a path, it gets created into contents at Initialize.
 	var/obj/item/tank
 
-/obj/structure/tank_holder/Initialize()
+/obj/structure/tank_holder/Initialize(mapload)
 	. = ..()
 	if(tank)
 		var/obj/item/tank_ = new tank(null)
@@ -42,7 +42,7 @@
 		. += "It is empty."
 	. += span_notice("It is held together by some <b>screws</b>.")
 
-/obj/structure/tank_holder/attackby(obj/item/W, mob/living/user, params)
+/obj/structure/tank_holder/attackby(obj/item/W, mob/living/user, list/modifiers, list/attack_modifiers)
 	if(user.combat_mode)
 		return ..()
 	if(W.tool_behaviour == TOOL_WRENCH)
@@ -63,13 +63,11 @@
 	deconstruct(TRUE)
 	return TRUE
 
-/obj/structure/tank_holder/deconstruct(disassembled = TRUE)
+/obj/structure/tank_holder/atom_deconstruct(disassembled = TRUE)
 	var/atom/Tsec = drop_location()
 	new /obj/item/stack/rods(Tsec, 2)
 	if(tank)
 		tank.forceMove(Tsec)
-		after_detach_tank()
-	qdel(src)
 
 /obj/structure/tank_holder/attack_paw(mob/user, list/modifiers)
 	return attack_hand(user, modifiers)
@@ -83,12 +81,11 @@
 	add_fingerprint(user)
 	tank.add_fingerprint(user)
 	user.put_in_hands(tank)
-	after_detach_tank()
 
-/obj/structure/tank_holder/handle_atom_del(atom/A)
-	if(A == tank)
+/obj/structure/tank_holder/Exited(atom/movable/gone, direction)
+	. = ..()
+	if(gone == tank)
 		after_detach_tank()
-	return ..()
 
 /obj/structure/tank_holder/contents_explosion(severity, target)
 	if(!tank)
@@ -144,3 +141,7 @@
 /obj/structure/tank_holder/extinguisher/advanced
 	icon_state = "holder_foam_extinguisher"
 	tank = /obj/item/extinguisher/advanced
+
+/obj/structure/tank_holder/extinguisher/anti
+	icon_state = "holder_extinguisher"
+	tank = /obj/item/extinguisher/anti

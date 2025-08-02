@@ -1,6 +1,6 @@
 // Cherries
 /obj/item/seeds/cherry
-	name = "pack of cherry pits"
+	name = "cherry pit pack"
 	desc = "Careful not to crack a tooth on one... That'd be the pits."
 	icon_state = "seed-cherry"
 	species = "cherry"
@@ -12,7 +12,7 @@
 	production = 5
 	growthstages = 5
 	instability = 15
-	growing_icon = 'icons/obj/hydroponics/growing_fruits.dmi'
+	growing_icon = 'icons/obj/service/hydroponics/growing_fruits.dmi'
 	icon_grow = "cherry-grow"
 	icon_dead = "cherry-dead"
 	icon_harvest = "cherry-harvest"
@@ -34,13 +34,13 @@
 
 // Blue Cherries
 /obj/item/seeds/cherry/blue
-	name = "pack of blue cherry pits"
+	name = "blue cherry pit pack"
 	desc = "The blue kind of cherries."
 	icon_state = "seed-bluecherry"
 	species = "bluecherry"
 	plantname = "Blue Cherry Tree"
 	product = /obj/item/food/grown/bluecherries
-	mutatelist = list()
+	mutatelist = null
 	reagents_add = list(/datum/reagent/consumable/nutriment = 0.07, /datum/reagent/consumable/sugar = 0.07, /datum/reagent/oxygen = 0.07)
 	rarity = 10
 
@@ -57,14 +57,14 @@
 
 //Cherry Bulbs
 /obj/item/seeds/cherry/bulb
-	name = "pack of cherry bulb pits"
+	name = "cherry bulb pit pack"
 	desc = "The glowy kind of cherries."
 	icon_state = "seed-cherrybulb"
 	species = "cherrybulb"
 	plantname = "Cherry Bulb Tree"
 	product = /obj/item/food/grown/cherrybulbs
 	genes = list(/datum/plant_gene/trait/repeated_harvest, /datum/plant_gene/trait/glow/pink)
-	mutatelist = list()
+	mutatelist = null
 	reagents_add = list(/datum/reagent/consumable/nutriment = 0.07, /datum/reagent/consumable/sugar = 0.07)
 	rarity = 10
 	graft_gene = /datum/plant_gene/trait/glow/pink
@@ -82,13 +82,13 @@
 
 //Cherry Bombs
 /obj/item/seeds/cherry/bomb
-	name = "pack of cherry bomb pits"
+	name = "cherry bomb pit pack"
 	desc = "They give you vibes of dread and frustration."
 	icon_state = "seed-cherry_bomb"
 	species = "cherry_bomb"
 	plantname = "Cherry Bomb Tree"
 	product = /obj/item/food/grown/cherry_bomb
-	mutatelist = list()
+	mutatelist = null
 	genes = list(/datum/plant_gene/trait/bomb_plant, /datum/plant_gene/trait/modified_volume/cherry_bomb)
 	reagents_add = list(/datum/reagent/consumable/nutriment = 0.1, /datum/reagent/consumable/sugar = 0.1, /datum/reagent/gunpowder = 0.7)
 	rarity = 60 //See above

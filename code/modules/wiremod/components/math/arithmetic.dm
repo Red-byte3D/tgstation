@@ -2,6 +2,7 @@
 #define COMP_ARITHMETIC_SUBTRACT "Subtract"
 #define COMP_ARITHMETIC_MULTIPLY "Multiply"
 #define COMP_ARITHMETIC_DIVIDE "Divide"
+#define COMP_ARITHMETIC_MODULO "Modulo"
 #define COMP_ARITHMETIC_MIN "Minimum"
 #define COMP_ARITHMETIC_MAX "Maximum"
 
@@ -14,9 +15,7 @@
 /obj/item/circuit_component/arithmetic
 	display_name = "Arithmetic"
 	desc = "General arithmetic component with arithmetic capabilities."
-
-	/// The amount of input ports to have
-	var/input_port_amount = 4
+	category = "Math"
 
 	var/datum/port/input/option/arithmetic_option
 
@@ -25,6 +24,10 @@
 
 	var/list/arithmetic_ports
 	circuit_flags = CIRCUIT_FLAG_INPUT_SIGNAL|CIRCUIT_FLAG_OUTPUT_SIGNAL
+	ui_buttons = list(
+		"plus" = "add",
+		"minus" = "remove"
+	)
 
 /obj/item/circuit_component/arithmetic/populate_options()
 	var/static/component_options = list(
@@ -32,35 +35,36 @@
 		COMP_ARITHMETIC_SUBTRACT,
 		COMP_ARITHMETIC_MULTIPLY,
 		COMP_ARITHMETIC_DIVIDE,
+		COMP_ARITHMETIC_MODULO,
 		COMP_ARITHMETIC_MIN,
 		COMP_ARITHMETIC_MAX,
 	)
 	arithmetic_option = add_option_port("Arithmetic Option", component_options)
 
-/obj/item/circuit_component/arithmetic/Initialize()
-	. = ..()
+/obj/item/circuit_component/arithmetic/populate_ports()
 	arithmetic_ports = list()
-	for(var/port_id in 1 to input_port_amount)
-		var/letter = ascii2text(text2ascii("A") + (port_id-1))
-		arithmetic_ports += add_input_port(letter, PORT_TYPE_NUMBER)
-
-	output = add_output_port("Output", PORT_TYPE_NUMBER)
+	AddComponent(/datum/component/circuit_component_add_port, \
+		port_list = arithmetic_ports, \
+		add_action = "add", \
+		remove_action = "remove", \
+		port_type = PORT_TYPE_NUMBER, \
+		prefix = "Port", \
+		minimum_amount = 2 \
+	)
+	output = add_output_port("Output", PORT_TYPE_NUMBER, order = 1.1)
 
 /obj/item/circuit_component/arithmetic/input_received(datum/port/input/port)
-	. = ..()
-	if(.)
-		return
 
 	var/list/ports = arithmetic_ports.Copy()
 	var/datum/port/input/first_port = popleft(ports)
-	var/result = first_port.input_value
+	var/result = first_port.value
 
 	for(var/datum/port/input/input_port as anything in ports)
-		var/value = input_port.input_value
+		var/value = input_port.value
 		if(isnull(value))
 			continue
 
-		switch(arithmetic_option.input_value)
+		switch(arithmetic_option.value)
 			if(COMP_ARITHMETIC_ADD)
 				result += value
 			if(COMP_ARITHMETIC_SUBTRACT)
@@ -73,6 +77,8 @@
 					result = null
 					break
 				result /= value
+			if(COMP_ARITHMETIC_MODULO)
+				result %= value
 			if(COMP_ARITHMETIC_MAX)
 				result = max(result, value)
 			if(COMP_ARITHMETIC_MIN)
@@ -84,5 +90,6 @@
 #undef COMP_ARITHMETIC_SUBTRACT
 #undef COMP_ARITHMETIC_MULTIPLY
 #undef COMP_ARITHMETIC_DIVIDE
+#undef COMP_ARITHMETIC_MODULO
 #undef COMP_ARITHMETIC_MIN
 #undef COMP_ARITHMETIC_MAX

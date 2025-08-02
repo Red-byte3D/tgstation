@@ -1,97 +1,65 @@
 // Note: BYOND is object oriented. There is no reason for this to be copy/pasted blood code.
 
-/obj/effect/decal/cleanable/xenoblood
-	name = "xeno blood"
+/obj/effect/decal/cleanable/blood/xeno
+	name = "pool of acid"
+	// This is fetched in /datum/blood_type/xeno/set_up_blood() for all blood decals with default desc
 	desc = "It's green and acidic. It looks like... <i>blood?</i>"
-	icon = 'icons/effects/blood.dmi'
-	icon_state = "xfloor1"
-	random_icon_states = list("xfloor1", "xfloor2", "xfloor3", "xfloor4", "xfloor5", "xfloor6", "xfloor7")
-	bloodiness = BLOOD_AMOUNT_PER_DECAL
-	blood_state = BLOOD_STATE_XENO
-	beauty = -250
-	clean_type = CLEAN_TYPE_BLOOD
+	color = /datum/blood_type/xeno::color // For mapper sanity
 
-/obj/effect/decal/cleanable/xenoblood/Initialize()
-	. = ..()
-	add_blood_DNA(list("UNKNOWN DNA" = "X*"))
+/obj/effect/decal/cleanable/blood/xeno/get_default_blood_type()
+	return get_blood_type(BLOOD_TYPE_XENO)
 
-/obj/effect/decal/cleanable/xenoblood/xsplatter
-	random_icon_states = list("xgibbl1", "xgibbl2", "xgibbl3", "xgibbl4", "xgibbl5")
+/obj/effect/decal/cleanable/blood/splatter/xeno
+	name = "pool of acid"
+	color = /datum/blood_type/xeno::color // For mapper sanity
 
-/obj/effect/decal/cleanable/xenoblood/xgibs
+/obj/effect/decal/cleanable/blood/splatter/xeno/get_default_blood_type()
+	return get_blood_type(BLOOD_TYPE_XENO)
+
+/obj/effect/decal/cleanable/blood/gibs/xeno
 	name = "xeno gibs"
 	desc = "Gnarly..."
-	icon = 'icons/effects/blood.dmi'
 	icon_state = "xgib1"
-	layer = LOW_OBJ_LAYER
 	random_icon_states = list("xgib1", "xgib2", "xgib3", "xgib4", "xgib5", "xgib6")
-	mergeable_decal = FALSE
+	color = /datum/blood_type/xeno::color // For mapper sanity
 
-/obj/effect/decal/cleanable/xenoblood/xgibs/Initialize()
-	. = ..()
-	RegisterSignal(src, COMSIG_MOVABLE_PIPE_EJECTING, .proc/on_pipe_eject)
+/obj/effect/decal/cleanable/blood/gibs/xeno/get_default_blood_type()
+	return get_blood_type(BLOOD_TYPE_XENO)
 
-/obj/effect/decal/cleanable/xenoblood/xgibs/proc/streak(list/directions, mapload=FALSE)
-	set waitfor = FALSE
-	var/direction = pick(directions)
-	for(var/i = 0, i < pick(1, 200; 2, 150; 3, 50; 4, 17; 50), i++) //the 3% chance of 50 steps is intentional and played for laughs.
-		if (!mapload)
-			sleep(2)
-		if(i > 0)
-			new /obj/effect/decal/cleanable/xenoblood/xsplatter(loc)
-		if(!step_to(src, get_step(src, direction), 0))
-			break
-
-/obj/effect/decal/cleanable/xenoblood/xgibs/proc/on_pipe_eject(atom/source, direction)
-	SIGNAL_HANDLER
-
-	var/list/dirs
-	if(direction)
-		dirs = list(direction, turn(direction, -45), turn(direction, 45))
-	else
-		dirs = GLOB.alldirs.Copy()
-
-	streak(dirs)
-
-/obj/effect/decal/cleanable/xenoblood/xgibs/ex_act()
-	return FALSE
-
-/obj/effect/decal/cleanable/xenoblood/xgibs/up
+/obj/effect/decal/cleanable/blood/gibs/xeno/up
 	icon_state = "xgibup1"
 	random_icon_states = list("xgib1", "xgib2", "xgib3", "xgib4", "xgib5", "xgib6","xgibup1","xgibup1","xgibup1")
 
-/obj/effect/decal/cleanable/xenoblood/xgibs/down
+/obj/effect/decal/cleanable/blood/gibs/xeno/down
 	icon_state = "xgibdown1"
 	random_icon_states = list("xgib1", "xgib2", "xgib3", "xgib4", "xgib5", "xgib6","xgibdown1","xgibdown1","xgibdown1")
 
-/obj/effect/decal/cleanable/xenoblood/xgibs/body
+/obj/effect/decal/cleanable/blood/gibs/xeno/body
 	icon_state = "xgibtorso"
 	random_icon_states = list("xgibhead", "xgibtorso")
 
-/obj/effect/decal/cleanable/xenoblood/xgibs/torso
+/obj/effect/decal/cleanable/blood/gibs/xeno/torso
 	icon_state = "xgibtorso"
 	random_icon_states = list("xgibtorso")
 
-/obj/effect/decal/cleanable/xenoblood/xgibs/limb
+/obj/effect/decal/cleanable/blood/gibs/xeno/limb
 	icon_state = "xgibleg"
 	random_icon_states = list("xgibleg", "xgibarm")
 
-/obj/effect/decal/cleanable/xenoblood/xgibs/core
+/obj/effect/decal/cleanable/blood/gibs/xeno/core
 	icon_state = "xgibmid1"
 	random_icon_states = list("xgibmid1", "xgibmid2", "xgibmid3")
 
-/obj/effect/decal/cleanable/xenoblood/xgibs/larva
+/obj/effect/decal/cleanable/blood/gibs/xeno/larva
 	icon_state = "xgiblarva1"
 	random_icon_states = list("xgiblarva1", "xgiblarva2")
 
-/obj/effect/decal/cleanable/xenoblood/xgibs/larva/body
+/obj/effect/decal/cleanable/blood/gibs/xeno/larva/body
 	icon_state = "xgiblarvatorso"
 	random_icon_states = list("xgiblarvahead", "xgiblarvatorso")
 
-/obj/effect/decal/cleanable/blood/xtracks
-	icon_state = "xtracks"
-	random_icon_states = null
+/obj/effect/decal/cleanable/blood/tracks/xeno
+	color = /datum/blood_type/xeno::color // For mapper sanity
 
-/obj/effect/decal/cleanable/blood/xtracks/Initialize()
-	. = ..()
-	add_blood_DNA(list("Unknown DNA" = "X*"))
+/obj/effect/decal/cleanable/blood/tracks/xeno/get_default_blood_type()
+	return get_blood_type(BLOOD_TYPE_XENO)
